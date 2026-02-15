@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Census Vision 1994 | Demographic Data Analyzer</title>
+        
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+        
+        <!-- Font Awesome for icons -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        
+        <!-- Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+        
+        <!-- Our CSS -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    </head>
+
+
+    <body>
+        <!-- Animated Background -->
+        <div class="background-animation"></div>
+        
+        <!-- Navigation Header -->
+        <nav class="navbar">
+            <div class="container">
+                <div class="nav-brand">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="brand-text">
+                        <span class="brand-main">CENSUS VISION</span>
+                        <span class="brand-year">1994</span>
+                    </span>
+                </div>
+                
+                <div class="nav-actions">
+                    <button class="btn-icon" id="uploadBtn" title="Upload CSV">
+                        <i class="fas fa-upload"></i>
+                    </button>
+                    <button class="btn-icon" id="filterBtn" title="Filters">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                    <button class="btn-icon" id="themeBtn" title="Toggle Theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    
+        <!-- Main Container -->
+        <main class="container">
+            
+            <!-- Hero Section with Key Stats -->
+            <section class="hero-stats">
+                <div class="stat-card glass-card" data-stat="records">
+                    <div class="stat-icon" style="--icon-color: #00e5ff">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="totalRecords">0</div>
+                        <div class="stat-label">Total Records</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card glass-card" data-stat="age">
+                    <div class="stat-icon" style="--icon-color: #b388ff">
+                        <i class="fas fa-birthday-cake"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="avgAge">0</div>
+                        <div class="stat-label">Avg Age (Men)</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card glass-card" data-stat="education">
+                    <div class="stat-icon" style="--icon-color: #ff6e40">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="bachelorsPct">0%</div>
+                        <div class="stat-label">Bachelor's Degrees</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card glass-card" data-stat="income">
+                    <div class="stat-icon" style="--icon-color: #00e676">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="highIncome">0%</div>
+                        <div class="stat-label">High Income (>50K)</div>
+                    </div>
+                </div>
+            </section>
+    
+            <!-- Education Insight Banner -->
+            <section class="insight-banner glass-card">
+                <div class="insight-icon">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <div class="insight-content">
+                    <h3>Key Insight</h3>
+                    <p id="insightText">Advanced education holders are <span class="highlight" id="eduMultiplier">0x</span> more likely to earn >$50K compared to those without advanced degrees.</p>
+                </div>
+            </section>
+    
+            <!-- Main Charts Grid -->
+            <section class="charts-grid">
+                
+                <!-- Race Distribution Chart -->
+                <div class="chart-container glass-card">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-users-cog"></i> Race Distribution</h3>
+                        <span class="chart-subtitle">Population breakdown by race</span>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="raceChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Education vs Income Chart -->
+                <div class="chart-container glass-card">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-book"></i> Education vs Income</h3>
+                        <span class="chart-subtitle">Percentage earning >$50K by education level</span>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="educationChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Country Analysis Chart -->
+                <div class="chart-container glass-card chart-wide">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-globe"></i> Geographic Income Analysis</h3>
+                        <span class="chart-subtitle">Top 15 countries by high-income percentage</span>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="countryChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Age Distribution Chart -->
+                <div class="chart-container glass-card">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-chart-area"></i> Age Distribution</h3>
+                        <span class="chart-subtitle">Population by age groups</span>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="ageChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Work Hours Analysis -->
+                <div class="chart-container glass-card">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-clock"></i> Work Hours Insight</h3>
+                        <span class="chart-subtitle">Income by working hours</span>
+                    </div>
+                    <div class="chart-body">
+                        <div class="work-hours-stats">
+                            <div class="work-stat">
+                                <div class="work-stat-value" id="minHours">0</div>
+                                <div class="work-stat-label">Min Hours/Week</div>
+                            </div>
+                            <div class="work-stat">
+                                <div class="work-stat-value" id="minHoursPct">0%</div>
+                                <div class="work-stat-label">Earning >50K at Min Hours</div>
+                            </div>
+                        </div>
+                        <div class="work-hours-info">
+                            <p><i class="fas fa-info-circle"></i> Interesting: Even among those working minimum hours, <strong><span id="minHoursPct2">0%</span></strong> earn more than $50K annually.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Top Country -->
+                <div class="chart-container glass-card">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-trophy"></i> Highest Earning Country</h3>
+                        <span class="chart-subtitle">Country with best income ratio</span>
+                    </div>
+                    <div class="chart-body">
+                        <div class="top-country-display">
+                            <div class="country-flag" id="topCountryFlag">🌍</div>
+                            <div class="country-name" id="topCountry">Loading...</div>
+                            <div class="country-percentage" id="topCountryPct">0%</div>
+                            <div class="country-label">of people earn >$50K</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- India Occupation -->
+                <div class="chart-container glass-card">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-briefcase"></i> Top Occupation in India</h3>
+                        <span class="chart-subtitle">Most common job among high earners</span>
+                    </div>
+                    <div class="chart-body">
+                        <div class="occupation-display">
+                            <div class="occupation-icon">💼</div>
+                            <div class="occupation-name" id="topOccupation">Loading...</div>
+                            <div class="occupation-label">Most popular occupation for >$50K earners in India</div>
+                        </div>
+                    </div>
+                </div>
+                
+            </section>
+    
+            <!-- Detailed Statistics Table -->
+            <section class="data-table-section glass-card">
+                <div class="table-header">
+                    <h3><i class="fas fa-table"></i> Detailed Statistics</h3>
+                    <button class="btn-secondary" id="exportBtn">
+                        <i class="fas fa-download"></i> Export Data
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table" id="statsTable">
+                        <thead>
+                            <tr>
+                                <th>Education Level</th>
+                                <th>Total Count</th>
+                                <th>Average Age</th>
+                                <th>Earning >50K</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+    
+        </main>
+    
+        <!-- Upload Modal -->
+        <div class="modal" id="uploadModal">
+            <div class="modal-content glass-card">
+                <div class="modal-header">
+                    <h2><i class="fas fa-upload"></i> Upload Custom Dataset</h2>
+                    <button class="modal-close" id="closeUploadModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="upload-area" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drag & drop your CSV file here</p>
+                        <p class="upload-hint">or click to browse</p>
+                        <input type="file" id="fileInput" accept=".csv" hidden>
+                    </div>
+                    <div class="upload-requirements">
+                        <p><strong>Required columns:</strong></p>
+                        <ul>
+                            <li>age, education, salary, sex, race</li>
+                            <li>native-country, occupation, hours-per-week</li>
+                        </ul>
+                    </div>
+                    <div class="upload-status" id="uploadStatus"></div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Filter Modal -->
+        <div class="modal" id="filterModal">
+            <div class="modal-content glass-card">
+                <div class="modal-header">
+                    <h2><i class="fas fa-filter"></i> Filter Data</h2>
+                    <button class="modal-close" id="closeFilterModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="filter-group">
+                        <label>Age Range</label>
+                        <div class="range-inputs">
+                            <input type="number" id="minAge" placeholder="Min" value="20">
+                            <span>to</span>
+                            <input type="number" id="maxAge" placeholder="Max" value="90">
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Education Level</label>
+                        <select id="educationFilter">
+                            <option value="all">All Levels</option>
+                            <option value="Bachelors">Bachelors</option>
+                            <option value="Masters">Masters</option>
+                            <option value="Doctorate">Doctorate</option>
+                            <option value="HS-grad">High School</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Sex</label>
+                        <select id="sexFilter">
+                            <option value="all">All</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-actions">
+                        <button class="btn-primary" id="applyFilters">
+                            <i class="fas fa-check"></i> Apply Filters
+                        </button>
+                        <button class="btn-secondary" id="resetFilters">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+            <p>Loading data...</p>
+        </div>
+    
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <p>Built with ❤️ for freeCodeCamp Data Analysis Certification</p>
+                <p>Data Source: UCI Machine Learning Repository (1994 Census Database)</p>
+            </div>
+        </footer>
+    
+        <!-- JavaScript -->
+        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    </body>
+
+</html>
